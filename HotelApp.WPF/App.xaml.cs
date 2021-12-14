@@ -28,7 +28,7 @@ namespace HotelApp.WPF
             services.AddTransient<MainWindow>();
             services.AddTransient<CheckInForm>();
             services.AddTransient<ISqlDataAccess, SqlDataAccess>();
-            services.AddTransient<IDatabaseData, SqlData>();
+            services.AddTransient<ISqliteDataAccess, SqliteDataAccess>();
 
             var builder = new ConfigurationBuilder()
                           .SetBasePath(Directory.GetCurrentDirectory())
@@ -37,6 +37,20 @@ namespace HotelApp.WPF
             IConfiguration config = builder.Build();
 
             services.AddSingleton(config);
+
+            string dbChoice = config.GetValue<string>("DatabaseChoice").ToLower();
+            if (dbChoice == "sql")
+            {
+                services.AddTransient<IDatabaseData, SqlData>();
+            }
+            else if (dbChoice == "sqlite")
+            {
+                services.AddTransient<IDatabaseData, SqliteData>();
+            }
+            else
+            {
+                services.AddTransient<IDatabaseData, SqlData>();
+            }
 
             serviceProvider = services.BuildServiceProvider();
             var mainWindow = serviceProvider.GetService<MainWindow>();
